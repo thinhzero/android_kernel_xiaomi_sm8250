@@ -8464,29 +8464,29 @@ static struct snd_soc_card *populate_snd_card_dailinks(struct device *dev)
 				total_links +=
 					ARRAY_SIZE(msm_mi2s_be_dai_links);
 #ifdef AUDIO_SM8250_FLAG
-				if (get_hw_version_platform() == HARDWARE_PLATFORM_UMI ||
-				    get_hw_version_platform() == HARDWARE_PLATFORM_CMI ||
-				    get_hw_version_platform() == HARDWARE_PLATFORM_APOLLO ||
-				    get_hw_version_platform() == HARDWARE_PLATFORM_ALIOTH ||
-				    get_hw_version_platform() == HARDWARE_PLATFORM_THYME ||
-				    get_hw_version_platform() == HARDWARE_PLATFORM_ENUMA ||
-				    get_hw_version_platform() == HARDWARE_PLATFORM_ELISH ||
-				    get_hw_version_platform() == HARDWARE_PLATFORM_PSYCHE ||
-				    get_hw_version_platform() == HARDWARE_PLATFORM_DAGU ||
-				    get_hw_version_platform() == HARDWARE_PLATFORM_CAS) {
+				if (IS_ENABLED(CONFIG_MACH_XIAOMI_UMI) ||
+				    IS_ENABLED(CONFIG_MACH_XIAOMI_CMI) ||
+				    IS_ENABLED(CONFIG_MACH_XIAOMI_APOLLO) ||
+				    IS_ENABLED(CONFIG_MACH_XIAOMI_ALIOTH) ||
+				    IS_ENABLED(CONFIG_MACH_XIAOMI_THYME) ||
+				    IS_ENABLED(CONFIG_MACH_XIAOMI_ENUMA) ||
+				    IS_ENABLED(CONFIG_MACH_XIAOMI_ELISH) ||
+				    IS_ENABLED(CONFIG_MACH_XIAOMI_PSYCHE) ||
+				    IS_ENABLED(CONFIG_MACH_XIAOMI_DAGU) ||
+				    IS_ENABLED(CONFIG_MACH_XIAOMI_CAS)) {
 					memcpy(msm_kona_dai_links + total_links,
 						tert_mi2s_rx_cs35l41_dai_links,
 						sizeof(tert_mi2s_rx_cs35l41_dai_links));
 					total_links += ARRAY_SIZE(tert_mi2s_rx_cs35l41_dai_links);
 					dev_info(dev, "%s: Using tert_mi2s_rx_cs35l41_dai_links\n", __func__);
-				} else if (get_hw_version_platform() == HARDWARE_PLATFORM_LMI ||
-							get_hw_version_platform() == HARDWARE_PLATFORM_MUNCH) {
+				} else if (IS_ENABLED(CONFIG_MACH_XIAOMI_LMI) ||
+							IS_ENABLED(CONFIG_MACH_XIAOMI_MUNCH)) {
 					memcpy(msm_kona_dai_links + total_links,
 						pri_mi2s_rx_tfa9874_dai_links,
 						sizeof(pri_mi2s_rx_tfa9874_dai_links));
 					total_links += ARRAY_SIZE(pri_mi2s_rx_tfa9874_dai_links);
 					dev_info(dev, "%s: Using pri_mi2s_rx_tfa9874_dai_links\n", __func__);
-				} else if (get_hw_version_platform() == HARDWARE_PLATFORM_PIPA) {
+				} else if (IS_ENABLED(CONFIG_MACH_XIAOMI_PIPA)) {
 					memcpy(msm_kona_dai_links + total_links,
 						tert_mi2s_rx_aw882xx_dai_links,
 						sizeof(tert_mi2s_rx_aw882xx_dai_links));
