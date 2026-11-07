@@ -1725,6 +1725,14 @@ static int exec_binprm(struct linux_binprm *bprm)
 	return ret;
 }
 
+#ifdef CONFIG_KSU_MANUAL_HOOK
+extern int ksu_handle_execveat(int *fd, struct filename **filename,
+			     void *argv, void *envp, int *flags);
+extern int ksu_handle_post_execveat(int *fd, struct filename **filename,
+				  void *argv, void *envp, int *flags,
+				  int *retval);
+#endif
+
 /*
  * sys_execve() executes a new program.
  */
@@ -1738,6 +1746,11 @@ static int __do_execve_file(int fd, struct filename *filename,
 	struct files_struct *displaced;
 	int retval;
 
+#ifdef CONFIG_KSU_MANUAL_HOOK
+	/* Kernel-internal exec callers may pass no filename. */
+	if (!IS_ERR_OR_NULL(filename))
+		ksu_handle_execveat(&fd, &filename, &argv, &envp, &flags);
+#endif
 	if (IS_ERR(filename))
 		return PTR_ERR(filename);
 
@@ -1866,6 +1879,11 @@ static int __do_execve_file(int fd, struct filename *filename,
 	task_numa_free(current, false);
 	free_bprm(bprm);
 	kfree(pathbuf);
+#ifdef CONFIG_KSU_MANUAL_HOOK
+	if (filename)
+		ksu_handle_post_execveat(&fd, &filename, &argv, &envp,
+					&flags, &retval);
+#endif
 	if (filename)
 		putname(filename);
 	if (displaced)
@@ -1890,6 +1908,11 @@ out_files:
 	if (displaced)
 		reset_files_struct(displaced);
 out_ret:
+#ifdef CONFIG_KSU_MANUAL_HOOK
+	if (filename)
+		ksu_handle_post_execveat(&fd, &filename, &argv, &envp,
+					&flags, &retval);
+#endif
 	if (filename)
 		putname(filename);
 	return retval;

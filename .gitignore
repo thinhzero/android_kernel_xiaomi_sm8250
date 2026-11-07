@@ -134,3 +134,9 @@ all.config
 
 # fetched Android config fragments
 kernel/configs/android-*.cfg
+
+# Local Mi 10S build outputs
+/out/
+
+# Packaged kernel artifacts
+/artifacts/

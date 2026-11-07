@@ -87,4 +87,56 @@ menu "Xiaomi board selection"
 		help
 		  Support for Mi 10
 
+	config MACH_XIAOMI_THYME
+		bool "Xiaomi thyme board"
+		select MACH_XIAOMI_SM8250
+		help
+		  Support for Mi 10S.
+
 endmenu
+
+# Keep the existing Qualcomm DTS and vendor audio board guards in sync.
+config BOARD_XIAOMI
+	def_bool MACH_XIAOMI
+
+config BOARD_XIAOMI_SM8250
+	def_bool MACH_XIAOMI_SM8250
+
+config BOARD_THYME
+	def_bool MACH_XIAOMI_THYME
+
+config BOARD_ALIOTH
+	def_bool MACH_XIAOMI_ALIOTH
+
+config BOARD_APOLLO
+	def_bool MACH_XIAOMI_APOLLO
+
+config BOARD_CAS
+	def_bool MACH_XIAOMI_CAS
+
+config BOARD_CMI
+	def_bool MACH_XIAOMI_CMI
+
+config BOARD_DAGU
+	def_bool MACH_XIAOMI_DAGU
+
+config BOARD_ELISH
+	def_bool MACH_XIAOMI_ELISH
+
+config BOARD_ENUMA
+	def_bool MACH_XIAOMI_ENUMA
+
+config BOARD_LMI
+	def_bool MACH_XIAOMI_LMI
+
+config BOARD_MUNCH
+	def_bool MACH_XIAOMI_MUNCH
+
+config BOARD_PIPA
+	def_bool MACH_XIAOMI_PIPA
+
+config BOARD_PSYCHE
+	def_bool MACH_XIAOMI_PSYCHE
+
+config BOARD_UMI
+	def_bool MACH_XIAOMI_UMI
