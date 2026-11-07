@@ -1,0 +1,91 @@
+name: Build Mi 10S thyme MIUI BakaSU
+
+on:
+  push:
+    branches:
+      - build/thyme-miui-bakasu
+      - android17-aptusitu-new
+  pull_request:
+    branches:
+      - build/thyme-miui-bakasu
+      - android17-aptusitu-new
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: thyme-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Thyme MIUI / BakaSU / no SUSFS
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      KBUILD_BUILD_USER: thinhzero
+      KBUILD_BUILD_HOST: github-actions
+    steps:
+      - name: Check out kernel source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Initialize pinned BakaSU source
+        run: |
+          git submodule update --init --recursive
+          git -C KernelSU describe --tags --always
+
+      - name: Install Clang 18 and build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential bc bison flex libssl-dev libelf-dev libncurses-dev \
+            device-tree-compiler git ca-certificates python3 zip unzip rsync cpio \
+            xz-utils lz4 clang-18 lld-18 llvm-18 \
+            gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi dwarves
+          echo /usr/lib/llvm-18/bin >> "$GITHUB_PATH"
+
+      - name: Build kernel, thyme DTBO and modules
+        shell: bash
+        run: |
+          mkdir -p artifacts/logs
+          set -o pipefail
+          BUILD_JOBS="$(nproc)" ./build-thyme.sh 2>&1 | tee artifacts/logs/build.log
+
+      - name: Package and validate AnyKernel ZIP
+        shell: bash
+        run: |
+          anykernel_dir="$RUNNER_TEMP/AnyKernel3"
+          git init "$anykernel_dir"
+          git -C "$anykernel_dir" remote add origin https://github.com/osm0sis/AnyKernel3.git
+          git -C "$anykernel_dir" fetch --depth=1 origin 41f04bdb4ee30a44e429c2c1131d5e8bb32b15f1
+          git -C "$anykernel_dir" checkout --detach FETCH_HEAD
+          python3 package-thyme.py --anykernel-dir "$anykernel_dir"
+          sed 's#^kernel/##' out/thyme/modules.order > "$RUNNER_TEMP/thyme-modules.list"
+          tar -cJf artifacts/thyme/thyme-modules.tar.xz \
+            -C out/thyme -T "$RUNNER_TEMP/thyme-modules.list"
+          (cd artifacts/thyme && sha256sum -c ./*.zip.sha256)
+
+      - name: Upload flashable kernel and build information
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: Mi10S-thyme-MIUI-BakaSU-${{ github.run_number }}
+          path: artifacts/thyme/
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+
+      - name: Upload build log and effective config
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: thyme-build-log-${{ github.run_number }}
+          path: |
+            artifacts/logs/
+            out/thyme/.config
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14

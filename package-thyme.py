@@ -54,7 +54,7 @@ assert overlay == (boot / 'dts/vendor/qcom/thyme-sm8250-overlay.dtbo').read_byte
 assert b'xiaomi thyme\0' in overlay, 'DTBO is not for thyme'
 config = subprocess.check_output(['bash', str(ROOT / 'scripts/extract-ikconfig'), str(boot / 'Image')])
 assert config.strip() == (args.out / '.config').read_bytes().strip(), 'Embedded config mismatch'
-for symbol in ('MACH_XIAOMI_THYME', 'BOARD_THYME', 'US_PROXIMITY', 'KSU', 'KSU_MANUAL_HOOK'):
+for symbol in ('MACH_XIAOMI_THYME', 'BOARD_THYME', 'XIAOMI_MIUI', 'US_PROXIMITY', 'KSU', 'KSU_MANUAL_HOOK'):
     assert f'CONFIG_{symbol}=y\n'.encode() in config, f'Missing {symbol}'
 assert b'CONFIG_KSU_SUSFS=y\n' not in config, 'SUSFS must be disabled'
 assert b'CONFIG_KSU_TRACEPOINT_HOOK=y\n' not in config, 'GKI tracepoint hook must be disabled'

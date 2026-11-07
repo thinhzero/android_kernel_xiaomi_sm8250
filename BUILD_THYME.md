@@ -2,7 +2,8 @@
 
 This target combines `vendor/kona-perf_defconfig`, the SM8250 common fragment,
 and `vendor/xiaomi/thyme.config`. It enables BakaSU manual hooks and ThinLTO;
-SUSFS and GKI tracepoint hooks are disabled. The kernel source is 4.19.325 CIP.
+SUSFS and GKI tracepoint hooks are disabled. `CONFIG_XIAOMI_MIUI=y` enables the
+synced Xiaomi MIUI configuration. The kernel source is 4.19.325 CIP.
 The missing ultrasound IIO driver is restored from Xiaomi's `cmi-r-oss`
 source (`64b40409431988d060f7484369c8c2d7deca1bb3`,
 `drivers/iio/proximity/us_prox.c`), with the unused bootinfo include removed,
@@ -49,3 +50,19 @@ thyme DTBO. The ZIP under `artifacts/thyme/` includes a build manifest and
 checksums; a detached ZIP SHA256 is generated next to it. The installer checks
 `thyme`, preserves the current ROM ramdisk, and installs the built kernel/DTB
 and DTBO. Device boot testing remains necessary.
+
+GitHub Actions uses `.github/workflows/build-thyme.yml` on Ubuntu 24.04 with
+Clang 18. Pushes to `build/thyme-miui-bakasu` run the build automatically;
+pull requests targeting that branch run the same checks. The workflow can
+also build the default branch after these changes are merged there.
+It checks out the pinned BakaSU submodule, builds the kernel/DTBO/modules,
+validates the AnyKernel ZIP, then uploads artifacts for 14 days:
+
+- `Mi10S-thyme-MIUI-BakaSU-<run>`: ZIP, checksum, manifest, config and a
+  separate module archive. The flashable ZIP does not install the modules.
+- `thyme-build-log-<run>`: build log and effective config, including on build
+  failures.
+
+The CI packager pins AnyKernel3 to
+`41f04bdb4ee30a44e429c2c1131d5e8bb32b15f1`. No GitHub PAT or repository secret
+is needed to build this public source or upload Actions artifacts.
